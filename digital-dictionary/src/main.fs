@@ -1,98 +1,107 @@
 open System
 open System.IO
+open System.Windows.Forms
 open Newtonsoft.Json
 
-
-type Dictionary = Map<string, string>
-
-
-let saveToFile (filePath: string) (dictionary: Dictionary) =
-    let json = JsonConvert.SerializeObject(dictionary, Formatting.Indented)
-    File.WriteAllText(filePath, json)
-    printfn "Dictionary saved to %s." filePath
+type DictionaryEntry = {
+    Word: string
+    Definition: string
+}
 
 
-let loadFromFile (filePath: string) =
-    if File.Exists(filePath) then
-        let json = File.ReadAllText(filePath)
-        JsonConvert.DeserializeObject<Dictionary>(json)
-    else
-        Map.empty
+module DigitalDictionary =
+
+    let addEntry word definition (dictionary: Map<string, string>) =
+        dictionary |> Map.add word definition
+
+    let updateEntry word newDefinition (dictionary: Map<string, string>) =
+        dictionary |> Map.add word newDefinition
+
+    let deleteEntry word (dictionary: Map<string, string>) =
+        dictionary |> Map.remove word
 
 
-let addWord (dictionary: Dictionary) (word: string) (definition: string) =
-    dictionary |> Map.add (word.ToLower()) definition
+    let searchEntry (keyword: string) (dictionary: Map<string, string>) : (string * string) list =
+     dictionary
+    |> Map.filter (fun (k: string) _ -> k.ToLowerInvariant().Contains(keyword.ToLowerInvariant()))
+    |> Map.toList
 
+    let saveToFile filePath (dictionary: Map<string, string>) =
+        let json = JsonConvert.SerializeObject(dictionary)
+        File.WriteAllText(filePath, json)
 
-let updateWord (dictionary: Dictionary) (word: string) (newDefinition: string) =
-    if dictionary.ContainsKey(word.ToLower()) then
-        dictionary |> Map.add (word.ToLower()) newDefinition
-    else
-        printfn "Word not found."
-        dictionary
+    let loadFromFile filePath =
+        if File.Exists(filePath) then
+            let json = File.ReadAllText(filePath)
+            JsonConvert.DeserializeObject<Map<string, string>>(json)
+        else
+            Map.empty
 
+            
+module DictionaryApp =
 
-let deleteWord (dictionary: Dictionary) (word: string) =
-    if dictionary.ContainsKey(word.ToLower()) then
-        dictionary |> Map.remove (word.ToLower())
-    else
-        printfn "Word not found."
-        dictionary
+    open DigitalDictionary
 
+    [<STAThread>]
+    let main () =
+        let mutable dictionary = Map.empty
+        let filePath = "dictionary.json"
 
-let searchWord (dictionary: Dictionary) (keyword: string) =
-    dictionary
-    |> Map.filter (fun key _ -> key.Contains(keyword.ToLower()))
-    |> Map.iter (fun key value -> printfn "%s: %s" key value)
+        dictionary <- loadFromFile filePath
 
-// Main function
-[<EntryPoint>]
-let main argv =
-    let filePath = "dictionary.json"
-    let mutable dictionary = loadFromFile filePath
+        let form = new Form(Text = "Digital Dictionary", Width = 600, Height = 400)
 
-    let rec mainMenu () =
-        printfn "\n--- Digital Dictionary ---"
-        printfn "1. Add Word"
-        printfn "2. Update Word"
-        printfn "3. Delete Word"
-        printfn "4. Search Word"
-        printfn "5. Save & Exit"
-        printf "Choose an option: "
-        match Console.ReadLine() with
-        | "1" ->
-            printf "Enter word: "
-            let word = Console.ReadLine()
-            printf "Enter definition: "
-            let definition = Console.ReadLine()
-            dictionary <- addWord dictionary word definition
-            printfn "Word added."
-            mainMenu()
-        | "2" ->
-            printf "Enter word to update: "
-            let word = Console.ReadLine()
-            printf "Enter new definition: "
-            let newDefinition = Console.ReadLine()
-            dictionary <- updateWord dictionary word newDefinition
-            mainMenu()
-        | "3" ->
-            printf "Enter word to delete: "
-            let word = Console.ReadLine()
-            dictionary <- deleteWord dictionary word
-            printfn "Word deleted."
-            mainMenu()
-        | "4" ->
-            printf "Enter word/keyword to search: "
-            let keyword = Console.ReadLine()
-            printfn "\n--- Search Results ---"
-            searchWord dictionary keyword
-            mainMenu()
-        | "5" ->
+        let lblWord = new Label(Text = "Word:", Top = 20, Left = 20)
+        let txtWord = new TextBox(Top = 20, Left = 120, Width = 200)
+
+        let lblDefinition = new Label(Text = "Definition:", Top = 60, Left = 20)
+        let txtDefinition = new TextBox(Top = 60, Left = 120, Width = 200)
+
+        let btnAdd = new Button(Text = "Add", Top = 100, Left = 20)
+        let btnUpdate = new Button(Text = "Update", Top = 100, Left = 100)
+        let btnDelete = new Button(Text = "Delete", Top = 100, Left = 200)
+
+        let lblSearch = new Label(Text = "Search:", Top = 140, Left = 20)
+        let txtSearch = new TextBox(Top = 140, Left = 120, Width = 200)
+        let btnSearch = new Button(Text = "Search", Top = 140, Left = 320)
+
+        let lstResults = new ListBox(Top = 180, Left = 20, Width = 540, Height = 150)
+
+        btnAdd.Click.Add(fun _ ->
+            let word = txtWord.Text
+            let definition = txtDefinition.Text
+            dictionary <- addEntry word definition dictionary
             saveToFile filePath dictionary
-            printfn "Goodbye!"
-        | _ ->
-            printfn "Invalid option."
-            mainMenu()
+            MessageBox.Show("Entry added.") |> ignore)
 
-    mainMenu()
-    0
+        btnUpdate.Click.Add(fun _ ->
+            let word = txtWord.Text
+            let definition = txtDefinition.Text
+            dictionary <- updateEntry word definition dictionary
+            saveToFile filePath dictionary
+            MessageBox.Show("Entry updated.") |> ignore)
+
+        btnDelete.Click.Add(fun _ ->
+            let word = txtWord.Text
+            dictionary <- deleteEntry word dictionary
+            saveToFile filePath dictionary
+            MessageBox.Show("Entry deleted.") |> ignore)
+
+        btnSearch.Click.Add(fun _ ->
+            let keyword = txtSearch.Text
+            let results = searchEntry keyword dictionary
+            lstResults.Items.Clear()
+            results |> List.iter (fun (word, definition) ->
+                lstResults.Items.Add(sprintf "%s: %s" word definition) |> ignore))
+
+        form.Controls.AddRange([|
+            lblWord :> Control; txtWord :> Control; 
+            lblDefinition :> Control; txtDefinition :> Control; 
+            btnAdd :> Control; btnUpdate :> Control; btnDelete :> Control; 
+            lblSearch :> Control; txtSearch :> Control; btnSearch :> Control; 
+            lstResults :> Control
+        |])
+
+        Application.Run(form)
+
+    main()
