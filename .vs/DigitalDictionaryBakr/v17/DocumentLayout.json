@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Faculity\\year4-sem1\\PL3\\Programming-Language-3-With-F--\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{644B8890-6761-480C-874D-27879481C410}|DigitalDictionaryBakr.fsproj|d:\\faculity\\year4-sem1\\pl3\\programming-language-3-with-f--\\digitaldictionarybakr.fsproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{644B8890-6761-480C-874D-27879481C410}|DigitalDictionaryBakr.fsproj|solutionrelative:digitaldictionarybakr.fsproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DigitalDictionaryBakr",
+              "DocumentMoniker": "D:\\Faculity\\year4-sem1\\PL3\\Programming-Language-3-With-F--\\DigitalDictionaryBakr.fsproj",
+              "RelativeDocumentMoniker": "DigitalDictionaryBakr.fsproj",
+              "ToolTip": "D:\\Faculity\\year4-sem1\\PL3\\Programming-Language-3-With-F--\\DigitalDictionaryBakr.fsproj",
+              "RelativeToolTip": "DigitalDictionaryBakr.fsproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001351|",
+              "WhenOpened": "2024-12-16T08:13:31.219Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
